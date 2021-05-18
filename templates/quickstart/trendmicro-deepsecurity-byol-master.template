@@ -19,9 +19,9 @@ Metadata:
         default: Network Configuration
       Parameters:
       - AWSVPC
-      - DeepSecuritySubnet
-      - DatabaseSubnet1
-      - DatabaseSubnet2
+      - DeepSecuritySubnet1
+      - DeepSecuritySubnet2
+      - DatabaseSubnet
     - Label:
         default: RDS Configuration
       Parameters:
@@ -49,8 +49,10 @@ Metadata:
         default: Administrator username for RDS Instance
       DatabaseAdminPassword:
         default: Administrator password for RDS Instance
-      DeepSecuritySubnet:
-        default: Public Subnet for Deep Security Managers
+      DeepSecuritySubnet1:
+        default: Subnet for Deep Security Manager 1
+      DeepSecuritySubnet2:
+        default: Subnet for Deep Security Manager 2
       DeepSecurityAdminName:
         default: Administrator username for Deep Security
       DeepSecurityAdminPass:
@@ -88,7 +90,7 @@ Parameters:
     - MSSQL
     - PostgreSQL
     - AuroraPostgreSQL
-  DatabaseSubnet1:
+  DatabaseSubnet:
     Description: Select a private subnet for the RDS database.  Must be a private
       subnet contained in the VPC chosen above.
     Type: AWS::EC2::Subnet::Id
@@ -121,9 +123,15 @@ Parameters:
     AllowedPattern: '[a-zA-Z0-9!^*\-_+]*'
     ConstraintDescription: Can only contain alphanumeric characters or the following
       special characters !^*-_+ Min length 8, max length 41
-  DeepSecuritySubnet:
-    Description: Select an existing Subnet for Deep Security Manager. Must be a public
-      subnet contained in the VPC chosen above.
+  DeepSecuritySubnet1:
+    Description: Select an existing Subnet for Deep Security Manager.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DeepSecuritySubnet2:
+    Description: Select an existing Subnet for Deep Security Manager.
     Type: AWS::EC2::Subnet::Id
     MinLength: '1'
     MaxLength: '255'
@@ -439,7 +447,8 @@ Resources:
       Parameters:
         AWSIKeyPairName: !Ref AWSKeyPairName
         AWSIVPC: !Ref AWSVPC
-        DSISubnetID: !Ref DeepSecuritySubnet
+        DSISubnetID1: !Ref DeepSecuritySubnet1
+        DSISubnetID2: !Ref DeepSecuritySubnet2
         DBIRDSInstanceSize:
           !FindInMap
           - RDSInstanceSize

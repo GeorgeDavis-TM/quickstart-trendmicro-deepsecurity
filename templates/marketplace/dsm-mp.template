@@ -187,7 +187,7 @@ Parameters:
     AllowedValues:
     - Internet-facing
     - Internal
-    Default: Internet-facing
+    Default: Internal
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase

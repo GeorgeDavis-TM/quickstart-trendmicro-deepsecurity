@@ -24,9 +24,15 @@ Parameters:
     MaxValue: 65535
     Default: '4119'
     ConstraintDescription: Must be a valid TCP port.
-  DSISubnetID:
-    Description: Existing Subnet for Deep Security Manager. Must be a public subnet
-      contained the in VPC chosen above.
+  DSISubnetID1:
+    Description: Existing Subnet for Deep Security Manager.
+    Type: String
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DSISubnetID2:
+    Description: Existing Subnet for Deep Security Manager.
     Type: String
     MinLength: '1'
     MaxLength: '255'
@@ -38,7 +44,7 @@ Parameters:
     AllowedValues:
     - Internet-facing
     - Internal
-    Default: Internet-facing
+    Default: Internal
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Quick Start bucket name can include numbers, lowercase
