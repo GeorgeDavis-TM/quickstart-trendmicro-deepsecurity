@@ -33,7 +33,9 @@ Metadata:
         default: EC2 Key Pair for SSH access
       AWSVPC:
         default: VPC for Deep Security Components
-      DeepSecuritySubnet:
+      DeepSecuritySubnet1:
+        default: Public Subnet for Deep Security Managers
+      DeepSecuritySubnet2:
         default: Public Subnet for Deep Security Managers
       DeepSecurityAdminName:
         default: Administrator username for Deep Security
@@ -77,9 +79,15 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     ConstraintDescription: RDS Subnet Groups must be comprised of 2 subnets in seperate
       availability zones within the specified VPC for deploying this template
-  DeepSecuritySubnet:
-    Description: Select an existing Subnet for Deep Security Manager. Must be a public
-      subnet contained in the VPC chosen above.
+  DeepSecuritySubnet1:
+    Description: Select an existing Subnet for Deep Security Manager.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DeepSecuritySubnet2:
+    Description: Select an existing Subnet for Deep Security Manager.
     Type: AWS::EC2::Subnet::Id
     MinLength: '1'
     MaxLength: '255'
@@ -371,7 +379,8 @@ Resources:
       Parameters:
         AWSIKeyPairName: !Ref AWSKeyPairName
         AWSIVPC: !Ref AWSVPC
-        DSISubnetID: !Ref DeepSecuritySubnet
+        DSISubnetID1: !Ref DeepSecuritySubnet1
+        DSISubnetID2: !Ref DeepSecuritySubnet2
         DBIRDSInstanceSize:
           !FindInMap
           - RDSInstanceSize
