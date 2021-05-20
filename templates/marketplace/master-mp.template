@@ -22,7 +22,8 @@ Metadata:
         default: Network Configuration
       Parameters:
       - AWSIVPC
-      - DSISubnetID
+      - DSISubnetID1
+      - DSISubnetID2
       - DBISubnet1
       - DBISubnet2
       - DSELBPosture
@@ -45,7 +46,10 @@ Metadata:
         default: EC2 Key Pair for SSH access
       AWSIVPC:
         default: VPC for Deep Security Components
-      DSISubnetID:
+      DSISubnetID1:
+        default: Subnet for Deep Security Managers. Must be public subnet if deploying
+          Internet-facing infrastructure, else must be private.
+      DSISubnetID2:
         default: Subnet for Deep Security Managers. Must be public subnet if deploying
           Internet-facing infrastructure, else must be private.
       DBIRDSInstanceSize:
@@ -110,7 +114,15 @@ Parameters:
     MinLength: '1'
     MaxLength: '255'
     AllowedPattern: '[-_a-zA-Z0-9]*'
-  DSISubnetID:
+  DSISubnetID1:
+    Description: Choose a public subnet for Deep Security Manager. Must be in same
+      AZ as primary RDS subnet.
+    Type: AWS::EC2::Subnet::Id
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DSISubnetID2:
     Description: Choose a public subnet for Deep Security Manager. Must be in same
       AZ as primary RDS subnet.
     Type: AWS::EC2::Subnet::Id
@@ -405,7 +417,7 @@ Resources:
         DSIPGUIPort: !Ref DSIPGUIPort
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSMPMNode: 'No'
-        DSISubnetID: !Ref DSISubnetID
+        DSISubnetID: !Ref DSISubnetID1
         DSMSG: !GetAtt DSIDSMSecurityGroup.Outputs.DSMSG
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
@@ -445,7 +457,7 @@ Resources:
         DSIPGUIPort: !Ref DSIPGUIPort
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSMPMNode: 'Yes'
-        DSISubnetID: !Ref DSISubnetID
+        DSISubnetID: !Ref DSISubnetID2
         DSMSG: !GetAtt DSIDSMSecurityGroup.Outputs.DSMSG
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
