@@ -86,7 +86,8 @@ Resources:
     DependsOn: ELBSG
     Properties:
       Subnets:
-      - !Ref DSISubnetID
+      - !Ref DSISubnetID1
+      - !Ref DSISubnetID2
       SecurityGroups:
       - !GetAtt
         - ELBSG

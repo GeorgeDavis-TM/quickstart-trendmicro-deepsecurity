@@ -115,16 +115,14 @@ Parameters:
     MaxLength: '255'
     AllowedPattern: '[-_a-zA-Z0-9]*'
   DSISubnetID1:
-    Description: Choose a public subnet for Deep Security Manager. Must be in same
-      AZ as primary RDS subnet.
+    Description: Choose a subnet for Deep Security Manager.
     Type: AWS::EC2::Subnet::Id
     MinLength: '1'
     MaxLength: '255'
     AllowedPattern: '[-_a-zA-Z0-9]*'
     ConstraintDescription: Subnet ID must exist in the chosen VPC
   DSISubnetID2:
-    Description: Choose a public subnet for Deep Security Manager. Must be in same
-      AZ as primary RDS subnet.
+    Description: Choose a subnet for Deep Security Manager.
     Type: AWS::EC2::Subnet::Id
     MinLength: '1'
     MaxLength: '255'
