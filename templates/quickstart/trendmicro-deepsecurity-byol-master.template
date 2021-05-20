@@ -90,7 +90,7 @@ Parameters:
     - MSSQL
     - PostgreSQL
     - AuroraPostgreSQL
-  DatabaseSubnet:
+  DatabaseSubnet1:
     Description: Select a private subnet for the RDS database.  Must be a private
       subnet contained in the VPC chosen above.
     Type: AWS::EC2::Subnet::Id
