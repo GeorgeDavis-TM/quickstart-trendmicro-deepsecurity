@@ -491,7 +491,7 @@ Resources:
         DSIPGUIPort: !Ref DSIPGUIPort
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSMPMNode: 'No'
-        DSISubnetID: !Ref DSISubnetID
+        DSISubnetID: !Ref DSISubnetID1
         DSMSG: !GetAtt DSIDSMSecurityGroup.Outputs.DSMSG
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
@@ -528,7 +528,7 @@ Resources:
         DSIPGUIPort: !Ref DSIPGUIPort
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSMPMNode: 'Yes'
-        DSISubnetID: !Ref DSISubnetID
+        DSISubnetID: !Ref DSISubnetID2
         DSMSG: !GetAtt DSIDSMSecurityGroup.Outputs.DSMSG
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
@@ -603,7 +603,8 @@ Resources:
         AWSIVPC: !Ref AWSIVPC
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSIPGUIPort: !Ref DSIPGUIPort
-        DSISubnetID: !Ref DSISubnetID
+        DSISubnetID1: !Ref DSISubnetID1
+        DSISubnetID2: !Ref DSISubnetID2
         DSELBPosture: !Ref DSELBPosture
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
