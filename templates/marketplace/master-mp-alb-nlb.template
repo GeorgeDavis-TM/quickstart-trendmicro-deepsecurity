@@ -710,8 +710,8 @@ Outputs:
   DeepSecurityHeartbeat:
     Value:
       Fn::Sub: dsm://${DSIALBNLB.Outputs.NLBFQDN}:${DSIPHeartbeatPort}/
-  ALBCanonicalHostedZoneNameID:
-    Value: !GetAtt DSIALBNLB.Outputs.ALBCanonicalHostedZoneNameID
+  ALBCanonicalHostedZoneID:
+    Value: !GetAtt DSIALBNLB.Outputs.ALBCanonicalHostedZoneID
   ALBDNSName:
     Value: !GetAtt DSIALBNLB.Outputs.ALBDNSName
 ...

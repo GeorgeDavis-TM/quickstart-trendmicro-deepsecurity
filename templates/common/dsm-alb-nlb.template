@@ -145,14 +145,12 @@ Outputs:
     Value: !GetAtt DSMNLB.DNSName
   ALBSourceSecurityGroup:
     Value: !GetAtt ALBSG.Outputs.ALBSG
-  ELSBSourceSecurityGroupOwnerID:
-    Value: !GetAtt DSMALB.SourceSecurityGroup.OwnerAlias
   DSIALB:
     Value: !Ref DSMALB
   DSINLB:
     Value: !Ref DSMNLB
-  ALBCanonicalHostedZoneNameID:
-    Value: !GetAtt DSMALB.CanonicalHostedZoneNameID
+  ALBCanonicalHostedZoneID:
+    Value: !GetAtt DSMALB.CanonicalHostedZoneID
   ALBDNSName:
     Value: !GetAtt DSMALB.DNSName
   ALBLoadBalancerFullName:
