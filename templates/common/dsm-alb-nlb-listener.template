@@ -76,11 +76,9 @@ Resources:
         - Key: stickiness.lb_cookie.duration_seconds
           Value: 600
       Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
+        - Id: !Ref DSMNode1
           Port: !Ref DSIPGUIPort
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
+        - Id: !Ref DSMNode2
           Port: !Ref DSIPGUIPort
       TargetType: instance      
       VpcId: !Ref AWSIVPC
@@ -126,11 +124,9 @@ Resources:
         - Key: stickiness.lb_cookie.duration_seconds
           Value: 600
       Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
+        - Id: !Ref DSMNode1
           Port: !Ref DSIPRelayPort
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
+        - Id: !Ref DSMNode2
           Port: !Ref DSIPRelayPort
       TargetType: instance      
       VpcId: !Ref AWSIVPC
@@ -159,16 +155,13 @@ Resources:
       Name: NLBTCPHeartbeatGroup
       Port: !Ref DSIPHeartbeatPort
       Protocol: TCP
-      ProtocolVersion: String
       Tags: 
         - Key: Name
           Value: NLBTCPHeartbeatGroup
       Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
+        - Id: !Ref DSMNode1
           Port: !Ref DSIPHeartbeatPort
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
+        - Id: !Ref DSMNode2
           Port: !Ref DSIPHeartbeatPort
       TargetType: instance      
       VpcId: !Ref AWSIVPC    
