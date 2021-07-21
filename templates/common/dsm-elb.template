@@ -136,7 +136,7 @@ Outputs:
     Value: !GetAtt DSMELB.DNSName
   ELBSourceSecurityGroup:
     Value: !GetAtt ELBSG.Outputs.ELBSG
-  ELSBSourceSecurityGroupOnwerID:
+  ELSBSourceSecurityGroupOwnerID:
     Value: !GetAtt DSMELB.SourceSecurityGroup.OwnerAlias
   DSIELB:
     Value: !Ref DSMELB
