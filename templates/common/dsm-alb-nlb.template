@@ -85,8 +85,6 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties: 
       IpAddressType: ipv4
-      LoadBalancerAttributes: 
-        - LoadBalancerAttribute
       Name: DeepSecurity-AppLB
       Scheme:
         !If
@@ -112,11 +110,7 @@ Resources:
         - Key: load_balancing.cross_zone.enabled
           Value: true
       Name: DeepSecurity-NetworkLB
-      Scheme: internal
-      SecurityGroups: 
-      - !GetAtt
-        - ALBSG
-        - Outputs.ALBSG
+      Scheme: internal      
       Subnets: 
         - !Ref DSISubnetID1
         - !Ref DSISubnetID2

@@ -421,7 +421,7 @@ Resources:
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
         DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
-        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.DSIALBLoadBalancerFullName
+        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.ALBLoadBalancerFullName
         DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
         DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
         DSALBPosture: !Ref DSALBPosture
@@ -463,7 +463,7 @@ Resources:
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
         DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
-        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.DSIALBLoadBalancerFullName
+        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.ALBLoadBalancerFullName
         DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
         DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
         DSALBPosture: !Ref DSALBPosture
