@@ -560,8 +560,8 @@ Resources:
         AWSIVPC: !Ref AWSIVPC        
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort        
         DSIPGUIPort: !Ref DSIPGUIPort
-        DSMNode1: !Ref DSMNode1.Outputs.DSMInstanceId
-        DSMNode2: !Ref DSMNode2.Outputs.DSMInstanceId
+        DSMNode1: !GetAtt DSMNode1.Outputs.DSMInstanceId
+        DSMNode2: !GetAtt DSMNode2.Outputs.DSMInstanceId
         DSMALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
         DSMNLB: !GetAtt DSIALBNLB.Outputs.DSINLB
   DSDatabaseAbstract:
