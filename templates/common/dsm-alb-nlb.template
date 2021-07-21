@@ -1,0 +1,313 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'v5.39: Deploys Elastic Load Balancers and Security Groups for Deep Security
+  (qs-1ngr590je). Manager.'
+Parameters:
+  AWSIVPC:
+    Description: Existing VPC to deploy Deep Security Manager
+    Type: AWS::EC2::VPC::Id
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+  DSIPHeartbeatPort:
+    Description: The heartbeat port used by Deep Security Agents and appliances to
+      communicate with the Deep Security Manager.
+    Type: Number
+    MinValue: 0
+    MaxValue: 65535
+    Default: '4120'
+    ConstraintDescription: Must be a valid TCP port.
+  DSIPGUIPort:
+    Description: The Deep Security Manager application and GUI port.
+    Type: Number
+    MinValue: 0
+    MaxValue: 65535
+    Default: '443'
+    ConstraintDescription: Must be a valid TCP port.
+  DSISubnetID1:
+    Description: Existing Subnet for Deep Security Manager.
+    Type: String
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DSISubnetID2:
+    Description: Existing Subnet for Deep Security Manager.
+    Type: String
+    MinLength: '1'
+    MaxLength: '255'
+    AllowedPattern: '[-_a-zA-Z0-9]*'
+    ConstraintDescription: Subnet ID must exist in the chosen VPC
+  DSMNode1:
+    Description: Instance Id of the Deep Security Manager.
+    Type: AWS::EC2::Instance::Id    
+    ConstraintDescription: Instance Id must exist in the chosen VPC
+  DSMNode2:
+    Description: Instance Id of the Deep Security Manager.
+    Type: AWS::EC2::Instance::Id    
+    ConstraintDescription: Instance Id must exist in the chosen VPC
+  DSALBPosture:
+    Description: Use internal or internet-facing ALB
+    Type: String
+    AllowedValues:
+    - Internet-facing
+    - Internal
+    Default: Internet-facing
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Quick Start bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-quickstart
+    Description: S3 bucket name for the Quick Start assets. Quick Start bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/]*$
+    ConstraintDescription: Quick Start key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), and forward slash (/).
+    Default: quickstart-trendmicro-deepsecurity/
+    Description: S3 key prefix for the Quick Start assets. Quick Start key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), and
+      forward slash (/).
+    Type: String
+Resources:
+  ALBSG:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/common/security-groups/ds-alb-sg.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AWSIVPC: !Ref AWSIVPC
+        DSIPGUIPort: !Ref DSIPGUIPort
+        DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
+  
+  DSMALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      IpAddressType: ipv4
+      LoadBalancerAttributes: 
+        - LoadBalancerAttribute
+      Name: DeepSecurity-AppLB
+      Scheme:
+        !If
+        - InternetFacingALB
+        - internet-facing
+        - internal
+      SecurityGroups: 
+      - !GetAtt
+        - ALBSG
+        - Outputs.ALBSG
+      Subnets: 
+        - !Ref DSISubnetID1
+        - !Ref DSISubnetID2
+      Tags: 
+        - Key: Name
+          Value: DeepSecurity-AppLB
+      Type: application
+
+  HTTPS443Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups: 
+              TargetGroupArn: !Ref ALBHTTPS443Group
+      LoadBalancerArn: !Ref DSMALB
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+
+  HTTPS4122Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups: 
+              TargetGroupArn: !Ref ALBHTTPS4122Group
+      LoadBalancerArn: !Ref DSMALB
+      Port: 443
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-2016-08
+
+  ALBHTTPS443Group:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher:           
+        HttpCode: 302
+      Name: ALBHTTPS443Group
+      Port: 443
+      Protocol: HTTPS
+      ProtocolVersion: HTTP1
+      Tags: 
+        - Key: Name
+          Value: ALBHTTPS443Group
+      TargetGroupAttributes: 
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: load_balancing.algorithm.type
+          Value: round_robin
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 600
+      Targets: 
+        - AvailabilityZone: all
+          Id: !Ref DSMNode1
+          Port: 443
+        - AvailabilityZone: all
+          Id: !Ref DSMNode2
+          Port: 443
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
+
+  ALBHTTPS4122Group:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher: 
+        HttpCode: 403
+      Name: ALBHTTPS4122Group
+      Port: 4122
+      Protocol: HTTPS
+      ProtocolVersion: HTTP1
+      Tags: 
+        - Key: Name
+          Value: ALBHTTPS4122Group
+      TargetGroupAttributes: 
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: load_balancing.algorithm.type
+          Value: round_robin
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 600
+      Targets: 
+        - AvailabilityZone: all
+          Id: !Ref DSMNode1
+          Port: 4122
+        - AvailabilityZone: all
+          Id: !Ref DSMNode2
+          Port: 4122
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
+
+  DSMNLB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      IpAddressType: ipv4
+      LoadBalancerAttributes: 
+        - Key: load_balancing.cross_zone.enabled
+          Value: true
+      Name: DeepSecurity-NetworkLB
+      Scheme: internal
+      SecurityGroups: 
+      - !GetAtt
+        - ALBSG
+        - Outputs.ALBSG
+      Subnets: 
+        - !Ref DSISubnetID1
+        - !Ref DSISubnetID2
+      Tags: 
+        - Key: Name
+          Value: DeepSecurity-NetworkLB
+      Type: network
+
+  TCP4120Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups: 
+              TargetGroupArn: !Ref ALBHTTPS4122Group
+      LoadBalancerArn: !Ref DSMNLB
+      Port: 4120
+      Protocol: TCP
+      SslPolicy: ELBSecurityPolicy-2016-08
+
+  NLBTCP4120Group:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30      
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 3
+      Name: NLBTCP4120Group
+      Port: 4120
+      Protocol: TCP
+      ProtocolVersion: String
+      Tags: 
+        - Key: Name
+          Value: NLBTCP4120Group
+      Targets: 
+        - AvailabilityZone: all
+          Id: !Ref DSMNode1
+          Port: 4120
+        - AvailabilityZone: all
+          Id: !Ref DSMNode2
+          Port: 4120
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
+
+Conditions:
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+  InternetFacingALB:
+    !Equals
+    - !Ref DSALBPosture
+    - Internet-facing
+  GovCloudCondition:
+    !Or 
+    - !Equals 
+      - !Ref AWS::Region
+      - us-gov-west-1
+    - !Equals 
+      - !Ref AWS::Region
+      - us-gov-east-1
+Outputs:
+  ALBFQDN:
+    Value: !GetAtt DSMALB.DNSName
+  NLBFQDN:
+    Value: !GetAtt DSMNLB.DNSName
+  ALBSourceSecurityGroup:
+    Value: !GetAtt ALBSG.Outputs.ALBSG
+  ELSBSourceSecurityGroupOwnerID:
+    Value: !GetAtt DSMALB.SourceSecurityGroup.OwnerAlias
+  DSIALB:
+    Value: !Ref DSMALB
+  ALBCanonicalHostedZoneNameID:
+    Value: !GetAtt DSMALB.CanonicalHostedZoneNameID
+  ALBDNSName:
+    Value: !GetAtt DSMALB.DNSName
+  ALBLoadBalancerFullName:
+    Value: !GetAtt DSMALB.LoadBalancerFullName
+...
