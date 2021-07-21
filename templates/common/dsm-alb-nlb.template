@@ -88,8 +88,7 @@ Resources:
       Parameters:
         AWSIVPC: !Ref AWSIVPC
         DSIPGUIPort: !Ref DSIPGUIPort
-        DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
-  
+        DSIPHeartbeatPort: !Ref DSIPHeartbeatPort  
   DSMALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties: 
@@ -112,112 +111,7 @@ Resources:
       Tags: 
         - Key: Name
           Value: DeepSecurity-AppLB
-      Type: application
-
-  HTTPS443Listener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - Type: forward
-          ForwardConfig:
-            TargetGroups: 
-              TargetGroupArn: !Ref ALBHTTPS443Group
-      LoadBalancerArn: !Ref DSMALB
-      Port: 443
-      Protocol: HTTPS
-      SslPolicy: ELBSecurityPolicy-2016-08
-
-  HTTPS4122Listener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - Type: forward
-          ForwardConfig:
-            TargetGroups: 
-              TargetGroupArn: !Ref ALBHTTPS4122Group
-      LoadBalancerArn: !Ref DSMALB
-      Port: 443
-      Protocol: HTTPS
-      SslPolicy: ELBSecurityPolicy-2016-08
-
-  ALBHTTPS443Group:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties: 
-      HealthCheckEnabled: true
-      HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /
-      HealthCheckPort: traffic-port
-      HealthCheckProtocol: HTTPS
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
-      UnhealthyThresholdCount: 2
-      Matcher:           
-        HttpCode: 302
-      Name: ALBHTTPS443Group
-      Port: 443
-      Protocol: HTTPS
-      ProtocolVersion: HTTP1
-      Tags: 
-        - Key: Name
-          Value: ALBHTTPS443Group
-      TargetGroupAttributes: 
-        - Key: stickiness.enabled
-          Value: true
-        - Key: stickiness.type
-          Value: lb_cookie
-        - Key: load_balancing.algorithm.type
-          Value: round_robin
-        - Key: stickiness.lb_cookie.duration_seconds
-          Value: 600
-      Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
-          Port: 443
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
-          Port: 443
-      TargetType: instance      
-      VpcId: !Ref AWSIVPC
-
-  ALBHTTPS4122Group:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties: 
-      HealthCheckEnabled: true
-      HealthCheckIntervalSeconds: 30
-      HealthCheckPath: /
-      HealthCheckPort: traffic-port
-      HealthCheckProtocol: HTTPS
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 5
-      UnhealthyThresholdCount: 2
-      Matcher: 
-        HttpCode: 403
-      Name: ALBHTTPS4122Group
-      Port: 4122
-      Protocol: HTTPS
-      ProtocolVersion: HTTP1
-      Tags: 
-        - Key: Name
-          Value: ALBHTTPS4122Group
-      TargetGroupAttributes: 
-        - Key: stickiness.enabled
-          Value: true
-        - Key: stickiness.type
-          Value: lb_cookie
-        - Key: load_balancing.algorithm.type
-          Value: round_robin
-        - Key: stickiness.lb_cookie.duration_seconds
-          Value: 600
-      Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
-          Port: 4122
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
-          Port: 4122
-      TargetType: instance      
-      VpcId: !Ref AWSIVPC
-
+      Type: application  
   DSMNLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties: 
@@ -237,48 +131,7 @@ Resources:
       Tags: 
         - Key: Name
           Value: DeepSecurity-NetworkLB
-      Type: network
-
-  TCP4120Listener:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions:
-        - Type: forward
-          ForwardConfig:
-            TargetGroups: 
-              TargetGroupArn: !Ref ALBHTTPS4122Group
-      LoadBalancerArn: !Ref DSMNLB
-      Port: 4120
-      Protocol: TCP
-      SslPolicy: ELBSecurityPolicy-2016-08
-
-  NLBTCP4120Group:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties: 
-      HealthCheckEnabled: true
-      HealthCheckIntervalSeconds: 30      
-      HealthCheckPort: traffic-port
-      HealthCheckProtocol: TCP
-      HealthCheckTimeoutSeconds: 10
-      HealthyThresholdCount: 3
-      UnhealthyThresholdCount: 3
-      Name: NLBTCP4120Group
-      Port: 4120
-      Protocol: TCP
-      ProtocolVersion: String
-      Tags: 
-        - Key: Name
-          Value: NLBTCP4120Group
-      Targets: 
-        - AvailabilityZone: all
-          Id: !Ref DSMNode1
-          Port: 4120
-        - AvailabilityZone: all
-          Id: !Ref DSMNode2
-          Port: 4120
-      TargetType: instance      
-      VpcId: !Ref AWSIVPC
-
+      Type: network  
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   InternetFacingALB:
@@ -304,6 +157,8 @@ Outputs:
     Value: !GetAtt DSMALB.SourceSecurityGroup.OwnerAlias
   DSIALB:
     Value: !Ref DSMALB
+  DSINLB:
+    Value: !Ref DSMNLB
   ALBCanonicalHostedZoneNameID:
     Value: !GetAtt DSMALB.CanonicalHostedZoneNameID
   ALBDNSName:

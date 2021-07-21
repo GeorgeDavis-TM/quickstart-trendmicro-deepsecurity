@@ -172,13 +172,16 @@ Parameters:
     - 'True'
     - 'False'
     Default: 'True'
-  DSIELB:
+  DSIALB:
     Type: String
     Default: ''
-  DSIELBLoadBalancerFullName:
+  DSIALBLoadBalancerFullName:
     Type: String
     Default: ''
-  DSIELBFQDN:
+  DSIALBFQDN:
+    Type: String
+    Default: ''
+  DSINLBFQDN:
     Type: String
     Default: ''
   DSM1CompleteWaitHandle:
@@ -422,7 +425,7 @@ Resources:
                   - ':'
                   - !Ref AWS::AccountId
                   - :loadbalancer/
-                  - !Ref DSIELBLoadBalancerFullName
+                  - !Ref DSIALBLoadBalancerFullName
             - Effect: Allow
               Action:
               - iam:UploadServerCertificate
@@ -708,14 +711,14 @@ Resources:
                   ${DBICAdminName} --pass ${DBICAdminPassword} --endpoint ${DBPRDSEndpoint}
                   --dbname ${DBPName}
               ignoreErrors: 'false'
-        addToELB:
-          commands:
-            0-add-instance-to-elb:
-              command:
-                Fn::Sub: |
-                  TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60"`
-                  aws elb register-instances-with-load-balancer --load-balancer ${DSIELB} --instances $(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id/) --region ${AWS::Region}
-              ignoreErrors: 'false'
+        # addToELB:
+        #   commands:
+        #     0-add-instance-to-elb:
+        #       command:
+        #         Fn::Sub: |
+        #           TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60"`
+        #           aws elb register-instances-with-load-balancer --load-balancer ${DSIALB} --instances $(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id/) --region ${AWS::Region}
+        #       ignoreErrors: 'false'
         fixManagerLoadBalancerSettings:
           files:
             # /etc/cfn/create-console-listener.sh:
@@ -739,7 +742,7 @@ Resources:
           commands:
             # 1-setup-elb-listener:
             #   command:
-            #     Fn::Sub: /etc/cfn/create-console-listener.sh ${DSIELB} ${DSIELBFQDN}
+            #     Fn::Sub: /etc/cfn/create-console-listener.sh ${DSIALB} ${DSIALBFQDN}
             #       ${DSIPGUIPort} ${AWS::StackName} 1 ${AWS::Region} >> /tmp/listener.log
             4-set-load-balancer-settings:
               command:
@@ -751,7 +754,7 @@ Resources:
               command:
                 Fn::Sub: |
                   TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60"`
-                  echo "$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4/) ${DSIELBFQDN}" >> /etc/hosts
+                  echo "$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4/) ${DSIALBFQDN}" >> /etc/hosts
         fixManagerHostObject:
           files:
             /etc/cfn/reactivate-manager.sh:
@@ -885,7 +888,7 @@ Conditions:
   AddToELB:
     !Not
     - !Equals
-      - !Ref DSIELB
+      - !Ref DSIALB
       - ''
   WaitNotProvided:
     !Equals

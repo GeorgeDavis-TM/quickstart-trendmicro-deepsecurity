@@ -420,10 +420,10 @@ Resources:
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
-        DSIALB: !GetAtt DSIALB.Outputs.DSIALB
-        DSIALBLoadBalancerFullName: !GetAtt DSIALB.Outputs.DSIALBLoadBalancerFullName
-        DSIALBFQDN: !GetAtt DSIALB.Outputs.ALBFQDN
-        DSINLBFQDN: !GetAtt DSIALB.Outputs.NLBFQDN
+        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
+        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.DSIALBLoadBalancerFullName
+        DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
+        DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
         DSALBPosture: !Ref DSALBPosture
         DSM1CompleteWaitHandle: !Ref DSM1CompleteWaitHandle        
         QSS3BucketName: !Ref QSS3BucketName
@@ -462,10 +462,10 @@ Resources:
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
-        DSIALB: !GetAtt DSIALB.Outputs.DSIALB
-        DSIALBLoadBalancerFullName: !GetAtt DSIALB.Outputs.DSIALBLoadBalancerFullName
-        DSIALBFQDN: !GetAtt DSIALB.Outputs.ALBFQDN
-        DSINLBFQDN: !GetAtt DSIALB.Outputs.NLBFQDN
+        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
+        DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.DSIALBLoadBalancerFullName
+        DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
+        DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
         DSALBPosture: !Ref DSALBPosture
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
@@ -502,8 +502,8 @@ Resources:
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
         DSM1NoDBCompleteWaitHandle: !Ref DSM1NoDBCompleteWaitHandle
-        DSIALB: !GetAtt DSIALB.Outputs.DSIALB
-        DSIALBFQDN: !GetAtt DSIALB.Outputs.ALBFQDN
+        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
+        DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
         DSALBPosture: !Ref DSALBPosture
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
@@ -538,12 +538,32 @@ Resources:
         DBPEngine: !Ref DBPEngine
         DSIPInstanceType: !Ref DSIPInstanceType
         CreateEIP: 'False'
-        DSIALB: !GetAtt DSIALB.Outputs.DSIALB
+        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
         DSALBPosture: !Ref DSALBPosture
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         DSProxyUrl: !Ref DSProxyUrl
+  DSMListeners:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+    - DSMNode1
+    - DSMNode2
+    - DSIALBNLB
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/common/dsm-alb-nlb-listener.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        AWSIVPC: !Ref AWSIVPC        
+        DSIPHeartbeatPort: !Ref DSIPHeartbeatPort        
+        DSIPGUIPort: !Ref DSIPGUIPort
+        DSMNode1: !Ref DSMNode1
+        DSMNode2: !Ref DSMNode2
+        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
+        DSINLB: !GetAtt DSIALBNLB.Outputs.DSINLB
   DSDatabaseAbstract:
     Type: AWS::CloudFormation::Stack
     Condition: LaunchRDSInstance
@@ -596,7 +616,7 @@ Resources:
         AWSIVPC: !Ref AWSIVPC
         DSIPGUIPort: !Ref DSIPGUIPort
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
-  DSIALB:
+  DSIALBNLB:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL:
@@ -626,7 +646,7 @@ Resources:
             S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
       Parameters:
         DSMSG: !GetAtt DSIDSMSecurityGroup.Outputs.DSMSG
-        ELBSourceSG: !GetAtt DSIALB.Outputs.ALBSourceSecurityGroup
+        ELBSourceSG: !GetAtt DSIALBNLB.Outputs.ALBSourceSecurityGroup
         DSIPHeartbeatPort: !Ref DSIPHeartbeatPort
         DSIPGUIPort: !Ref DSIPGUIPort
   DSM1CompleteWaitHandle:
@@ -688,12 +708,12 @@ Conditions:
 Outputs:
   DeepSecurityConsole:
     Value:
-      Fn::Sub: https://${DSIALB.Outputs.ALBFQDN}
+      Fn::Sub: https://${DSIALBNLB.Outputs.ALBFQDN}
   DeepSecurityHeartbeat:
     Value:
-      Fn::Sub: dsm://${DSIALB.Outputs.NLBFQDN}:${DSIPHeartbeatPort}/
+      Fn::Sub: dsm://${DSIALBNLB.Outputs.NLBFQDN}:${DSIPHeartbeatPort}/
   ALBCanonicalHostedZoneNameID:
-    Value: !GetAtt DSIALB.Outputs.ALBCanonicalHostedZoneNameID
+    Value: !GetAtt DSIALBNLB.Outputs.ALBCanonicalHostedZoneNameID
   ALBDNSName:
-    Value: !GetAtt DSIALB.Outputs.ALBDNSName
+    Value: !GetAtt DSIALBNLB.Outputs.ALBDNSName
 ...
