@@ -187,14 +187,8 @@ Resources:
 Outputs:
   ALBHTTPSGUIGroupName:
     Value: !GetAtt ALBHTTPSGUIGroup.TargetGroupFullName
-  ALBHTTPSGUILoadBalancerArn:
-    Value: !GetAtt ALBHTTPSGUIGroup.LoadBalancerArns
   ALBHTTPSRelayGroupName:
     Value: !GetAtt ALBHTTPSRelayGroup.TargetGroupFullName
-  ALBHTTPS4122LoadBalancerArn:
-    Value: !GetAtt ALBHTTPSRelayGroup.LoadBalancerArns
   NLBTCPHeartbeatGroupName:
-    Value: !GetAtt NLBTCPHeartbeatGroup.TargetGroupFullName  
-  NLBTCPHeartbeatLoadBalancerArn:
-    Value: !GetAtt NLBTCPHeartbeatGroup.LoadBalancerArns
+    Value: !GetAtt NLBTCPHeartbeatGroup.TargetGroupFullName
 ...
