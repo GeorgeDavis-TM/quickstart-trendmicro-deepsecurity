@@ -562,8 +562,8 @@ Resources:
         DSIPGUIPort: !Ref DSIPGUIPort
         DSMNode1: !Ref DSMNode1
         DSMNode2: !Ref DSMNode2
-        DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
-        DSINLB: !GetAtt DSIALBNLB.Outputs.DSINLB
+        DSMALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
+        DSMNLB: !GetAtt DSIALBNLB.Outputs.DSINLB
   DSDatabaseAbstract:
     Type: AWS::CloudFormation::Stack
     Condition: LaunchRDSInstance
