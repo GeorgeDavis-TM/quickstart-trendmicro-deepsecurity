@@ -187,7 +187,7 @@ Parameters:
   DSM1CompleteWaitHandle:
     Type: String
     Default: ''
-  DSELBPosture:
+  DSALBPosture:
     Description: Use internal or internet-facing ELB
     Type: String
     AllowedValues:
@@ -918,7 +918,7 @@ Conditions:
     - !Condition PPUNotSelected
   InternetFacingELB:
     !Equals
-    - !Ref DSELBPosture
+    - !Ref DSALBPosture
     - Internet-facing
   NetworkOnlyLicense:
     !Equals
