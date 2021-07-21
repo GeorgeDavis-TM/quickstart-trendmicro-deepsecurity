@@ -38,14 +38,6 @@ Parameters:
     MaxLength: '255'
     AllowedPattern: '[-_a-zA-Z0-9]*'
     ConstraintDescription: Subnet ID must exist in the chosen VPC
-  DSMNode1:
-    Description: Instance Id of the Deep Security Manager.
-    Type: AWS::EC2::Instance::Id    
-    ConstraintDescription: Instance Id must exist in the chosen VPC
-  DSMNode2:
-    Description: Instance Id of the Deep Security Manager.
-    Type: AWS::EC2::Instance::Id    
-    ConstraintDescription: Instance Id must exist in the chosen VPC
   DSALBPosture:
     Description: Use internal or internet-facing ALB
     Type: String
