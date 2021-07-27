@@ -188,10 +188,19 @@ Parameters:
   DSIALBFQDN:
     Type: String
     Default: ''
+  DSIALBHTTPSGUIGroupName:
+    Type: String
+    Default: ''
+  DSIALBHTTPSRelayGroupName:
+    Type: String
+    Default: ''
   DSINLB:
     Type: String
     Default: ''
   DSINLBFQDN:
+    Type: String
+    Default: ''
+  DSINLBTCPHeartbeatGroupName:
     Type: String
     Default: ''
   DSM1CompleteWaitHandle:
