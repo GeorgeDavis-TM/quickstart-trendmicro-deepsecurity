@@ -247,14 +247,12 @@ Outputs:
     Value: !Ref DSMNLB
   ALBCanonicalHostedZoneID:
     Value: !GetAtt DSMALB.CanonicalHostedZoneID
-  ALBDNSName:
-    Value: !GetAtt DSMALB.DNSName
   ALBLoadBalancerFullName:
     Value: !GetAtt DSMALB.LoadBalancerFullName
   ALBHTTPSGUIGroupName:
-    Value: !GetAtt ALBHTTPSGUIGroup
+    Value: !Ref ALBHTTPSGUIGroup
   ALBHTTPSRelayGroupName:
-    Value: !GetAtt ALBHTTPSRelayGroup
+    Value: !Ref ALBHTTPSRelayGroup
   NLBTCPHeartbeatGroupName:
-    Value: !GetAtt NLBTCPHeartbeatGroup
+    Value: !Ref NLBTCPHeartbeatGroup
 ...

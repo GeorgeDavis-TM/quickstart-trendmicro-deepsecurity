@@ -471,7 +471,11 @@ Resources:
         DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
         DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.ALBLoadBalancerFullName
         DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
+        DSIALBHTTPSGUIGroupName: !GetAtt DSIALBNLB.Outputs.ALBHTTPSGUIGroupName
+        DSIALBHTTPSRelayGroupName: !GetAtt DSIALBNLB.Outputs.ALBHTTPSRelayGroupName
+        DSINLB: !GetAtt DSIALBNLB.Outputs.DSINLB
         DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
+        DSINLBTCPHeartbeatGroupName: !GetAtt DSIALBNLB.Outputs.NLBTCPHeartbeatGroupName
         DSALBPosture: !Ref DSALBPosture
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
@@ -719,5 +723,5 @@ Outputs:
   ALBCanonicalHostedZoneID:
     Value: !GetAtt DSIALBNLB.Outputs.ALBCanonicalHostedZoneID
   ALBDNSName:
-    Value: !GetAtt DSIALBNLB.Outputs.ALBDNSName
+    Value: !GetAtt DSIALBNLB.Outputs.ALBFQDN
 ...
