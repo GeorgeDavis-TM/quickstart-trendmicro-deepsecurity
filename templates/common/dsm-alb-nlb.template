@@ -24,6 +24,13 @@ Parameters:
     MaxValue: 65535
     Default: '443'
     ConstraintDescription: Must be a valid TCP port.
+  DSIPRelayPort:
+    Description: The Deep Security Manager application and Relay port.
+    Type: Number
+    MinValue: 0
+    MaxValue: 65535
+    Default: 4122
+    ConstraintDescription: Must be a valid TCP port.
   DSISubnetID1:
     Description: Existing Subnet for Deep Security Manager.
     Type: String
@@ -101,7 +108,79 @@ Resources:
       Tags: 
         - Key: Name
           Value: DeepSecurity-AppLB
-      Type: application  
+      Type: application
+  ALBHTTPSGUIGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher:           
+        HttpCode: 302
+      Name: ALBHTTPSGUIGroup
+      Port: !Ref DSIPGUIPort
+      Protocol: HTTPS
+      ProtocolVersion: HTTP1
+      Tags: 
+        - Key: Name
+          Value: ALBHTTPSGUIGroup
+      TargetGroupAttributes: 
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: load_balancing.algorithm.type
+          Value: round_robin
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 600
+      # Targets: 
+      #   - Id: !Ref DSMNode1
+      #     Port: !Ref DSIPGUIPort
+      #   - Id: !Ref DSMNode2
+      #     Port: !Ref DSIPGUIPort
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
+  ALBHTTPSRelayGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      UnhealthyThresholdCount: 2
+      Matcher: 
+        HttpCode: 403
+      Name: ALBHTTPSRelayGroup
+      Port: !Ref DSIPRelayPort
+      Protocol: HTTPS
+      ProtocolVersion: HTTP1
+      Tags: 
+        - Key: Name
+          Value: ALBHTTPSRelayGroup
+      TargetGroupAttributes: 
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: load_balancing.algorithm.type
+          Value: round_robin
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: 600
+      # Targets: 
+      #   - Id: !Ref DSMNode1
+      #     Port: !Ref DSIPRelayPort
+      #   - Id: !Ref DSMNode2
+      #     Port: !Ref DSIPRelayPort
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
   DSMNLB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties: 
@@ -117,7 +196,30 @@ Resources:
       Tags: 
         - Key: Name
           Value: DeepSecurity-NetworkLB
-      Type: network  
+      Type: network
+  NLBTCPHeartbeatGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties: 
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 30      
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: TCP
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 3
+      UnhealthyThresholdCount: 3
+      Name: NLBTCPHeartbeatGroup
+      Port: !Ref DSIPHeartbeatPort
+      Protocol: TCP
+      Tags: 
+        - Key: Name
+          Value: NLBTCPHeartbeatGroup
+      # Targets: 
+      #   - Id: !Ref DSMNode1
+      #     Port: !Ref DSIPHeartbeatPort
+      #   - Id: !Ref DSMNode2
+      #     Port: !Ref DSIPHeartbeatPort
+      TargetType: instance      
+      VpcId: !Ref AWSIVPC
 Conditions:
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
   InternetFacingALB:
@@ -149,4 +251,10 @@ Outputs:
     Value: !GetAtt DSMALB.DNSName
   ALBLoadBalancerFullName:
     Value: !GetAtt DSMALB.LoadBalancerFullName
+  ALBHTTPSGUIGroupName:
+    Value: !GetAtt ALBHTTPSGUIGroup
+  ALBHTTPSRelayGroupName:
+    Value: !GetAtt ALBHTTPSRelayGroup
+  NLBTCPHeartbeatGroupName:
+    Value: !GetAtt NLBTCPHeartbeatGroup
 ...

@@ -394,6 +394,7 @@ Resources:
     DependsOn:
     - DSDatabaseAbstract
     - DSIDSMSecurityGroup
+    - DSIALBNLB
     Condition: LaunchRDSInstance
     Properties:
       TemplateURL:
@@ -423,7 +424,11 @@ Resources:
         DSIALB: !GetAtt DSIALBNLB.Outputs.DSIALB
         DSIALBLoadBalancerFullName: !GetAtt DSIALBNLB.Outputs.ALBLoadBalancerFullName
         DSIALBFQDN: !GetAtt DSIALBNLB.Outputs.ALBFQDN
+        DSIALBHTTPSGUIGroupName: !GetAtt DSIALBNLB.Outputs.ALBHTTPSGUIGroupName
+        DSIALBHTTPSRelayGroupName: !GetAtt DSIALBNLB.Outputs.ALBHTTPSRelayGroupName
+        DSINLB: !GetAtt DSIALBNLB.Outputs.DSINLB
         DSINLBFQDN: !GetAtt DSIALBNLB.Outputs.NLBFQDN
+        DSINLBTCPHeartbeatGroupName: !GetAtt DSIALBNLB.Outputs.NLBTCPHeartbeatGroupName
         DSALBPosture: !Ref DSALBPosture
         DSM1CompleteWaitHandle: !Ref DSM1CompleteWaitHandle        
         QSS3BucketName: !Ref QSS3BucketName
@@ -436,6 +441,7 @@ Resources:
     DependsOn:
     - DSIDSMSecurityGroup
     - DSM1CompleteWaitCondition
+    - DSIALBNLB    
     Condition: DSMNode2DB
     Properties:
       TemplateURL:
@@ -544,26 +550,26 @@ Resources:
         QSS3BucketRegion: !Ref QSS3BucketRegion
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         DSProxyUrl: !Ref DSProxyUrl
-  DSMListeners:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-    - DSMNode1
-    - DSMNode2
-    - DSIALBNLB
-    Properties:
-      TemplateURL:
-        !Sub
-          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/common/dsm-alb-nlb-listener.template'
-          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-      Parameters:
-        AWSIVPC: !Ref AWSIVPC        
-        DSIPHeartbeatPort: !Ref DSIPHeartbeatPort        
-        DSIPGUIPort: !Ref DSIPGUIPort
-        DSMNode1: !GetAtt DSMNode1.Outputs.DSMInstanceId
-        DSMNode2: !GetAtt DSMNode2.Outputs.DSMInstanceId
-        DSMALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
-        DSMNLB: !GetAtt DSIALBNLB.Outputs.DSINLB
+  # DSMListeners:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #   # - DSMNode1
+  #   # - DSMNode2
+  #   - DSIALBNLB
+  #   Properties:
+  #     TemplateURL:
+  #       !Sub
+  #         - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}templates/common/dsm-alb-nlb-listener.template'
+  #         - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+  #           S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+  #     Parameters:
+  #       AWSIVPC: !Ref AWSIVPC        
+  #       DSIPHeartbeatPort: !Ref DSIPHeartbeatPort        
+  #       DSIPGUIPort: !Ref DSIPGUIPort
+  #       # DSMNode1: !GetAtt DSMNode1.Outputs.DSMInstanceId
+  #       # DSMNode2: !GetAtt DSMNode2.Outputs.DSMInstanceId
+  #       DSMALB: !GetAtt DSIALBNLB.Outputs.DSIALB        
+  #       DSMNLB: !GetAtt DSIALBNLB.Outputs.DSINLB
   DSDatabaseAbstract:
     Type: AWS::CloudFormation::Stack
     Condition: LaunchRDSInstance

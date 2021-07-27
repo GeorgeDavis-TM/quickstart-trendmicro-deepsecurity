@@ -1,5 +1,5 @@
 #!/bin/bash
-##set-lb-settings <dsmuser> <dsmpass> <managerfqdn> <consoleport> <hbport>
+## set-alb-nlb-settings <dsmuser> <dsmpass> <albfqdn> <consoleport> <hbport> <nlbfqdn>
 user=$1
 pass=$2
 albfqdn=$3
@@ -7,8 +7,6 @@ consoleport=$4
 heartbeatport=$5
 manager=localhost:${4}
 nlbfqdn=$6
-
-
 
 SID=`curl -k -H "Content-Type: application/json" -X POST "https://${manager}/rest/authentication/login/primary" -d '{"dsCredentials":{"userName":"'${user}'","password":"'${pass}'"}}'`
 

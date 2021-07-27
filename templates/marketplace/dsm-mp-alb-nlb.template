@@ -60,6 +60,13 @@ Parameters:
     MaxValue: 65535
     Default: '4119'
     ConstraintDescription: Must be a valid TCP port.
+  DSIPRelayPort:
+    Description: The Deep Security Manager relay port.
+    Type: Number
+    MinValue: 0
+    MaxValue: 65535
+    Default: '4120'
+    ConstraintDescription: Must be a valid TCP port.
   DSIPInstanceType:
     Description: Amazon EC2 instance type for the Deep Security Manager Node Instances
     Type: String
@@ -179,6 +186,9 @@ Parameters:
     Type: String
     Default: ''
   DSIALBFQDN:
+    Type: String
+    Default: ''
+  DSINLB:
     Type: String
     Default: ''
   DSINLBFQDN:
@@ -721,15 +731,15 @@ Resources:
         #       ignoreErrors: 'false'
         fixManagerLoadBalancerSettings:
           files:
-            # /etc/cfn/create-console-listener.sh:
-            #   source:
-            #     Fn::Sub:
-            #     - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/create-console-listener.sh
-            #     - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
-            #       S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
-            #   owner: root
-            #   mode: '000700'
-            #   authentication: S3AccessCreds
+            /etc/cfn/create-console-listener-alb-nlb.sh:
+              source:
+                Fn::Sub:
+                - https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}scripts/create-console-listener-alb-nlb.sh
+                - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+                  S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+              owner: root
+              mode: '000700'
+              authentication: S3AccessCreds
             /etc/cfn/set-alb-nlb-settings.sh:
               source:
                 Fn::Sub:
@@ -740,10 +750,9 @@ Resources:
               mode: '000700'
               authentication: S3AccessCreds
           commands:
-            # 1-setup-elb-listener:
-            #   command:
-            #     Fn::Sub: /etc/cfn/create-console-listener.sh ${DSIALB} ${DSIALBFQDN}
-            #       ${DSIPGUIPort} ${AWS::StackName} 1 ${AWS::Region} >> /tmp/listener.log
+            1-setup-elb-listener:
+              command:
+                Fn::Sub: /etc/cfn/create-console-listener-alb-nlb.sh ${DSIALB} ${DSIALBFQDN} ${DSIPGUIPort} ${AWS::StackName} 1 ${AWS::Region} ${DSIALBHTTPSGUIGroupName} ${DSIPRelayPort} ${DSIALBHTTPSRelayGroupName} ${DSIPHeartbeatPort} ${DSINLB} ${DSINLBFQDN} ${DSINLBTCPHeartbeatGroupName} >> /tmp/listener.log
             4-set-load-balancer-settings:
               command:
                 Fn::Sub: /etc/cfn/set-alb-nlb-settings.sh ${DSCAdminName} ${DSCAdminPassword}
